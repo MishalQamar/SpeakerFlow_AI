@@ -1,9 +1,9 @@
 from logging.config import fileConfig
 
 from alembic import context
-from database.speaking_request_db import SpeakingRequestBase
 from sqlalchemy import create_engine, pool
 
+from speakerflow_ai.database.speaking_request_db import SpeakingRequestBase
 from speakerflow_ai.web_app.config import load_config
 
 config = context.config
