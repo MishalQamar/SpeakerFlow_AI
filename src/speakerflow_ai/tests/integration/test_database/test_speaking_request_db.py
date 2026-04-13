@@ -1,8 +1,8 @@
 import datetime
 import uuid
 
-from database import speaking_request_db
-from models import Address, SpeakingRequest
+from speakerflow_ai.database import speaking_request_db
+from speakerflow_ai.models import Address, SpeakingRequest
 
 
 def test_speaking_request_save_and_fetch(database_session):

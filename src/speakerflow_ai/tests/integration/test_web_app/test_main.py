@@ -5,7 +5,7 @@ from speakerflow_ai.web_app.main import app
 
 
 @pytest.fixture
-def client():
+def client(database_engine):
     return TestClient(app)
 
 

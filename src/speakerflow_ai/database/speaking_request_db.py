@@ -4,7 +4,7 @@ from typing import Any
 from sqlalchemy import JSON, DateTime, SmallInteger, String, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
-from speakerflow_ai.models import SpeakingRequest
+from speakerflow_ai.models import Address, SpeakingRequest, SpeakingRequestStatus
 
 
 class SpeakingRequestBase(DeclarativeBase):
@@ -31,7 +31,7 @@ def save(session: Session, speaking_request: SpeakingRequest) -> SpeakingRequest
         topic=speaking_request.topic,
         duration_in_minutes=speaking_request.duration_in_minutes,
         requester_email=speaking_request.requester_email,
-        status=speaking_request.status,
+        status=speaking_request.status.value,
     )
     session.merge(speaking_request_model)
     session.commit()
@@ -46,11 +46,11 @@ def list_all(session: Session) -> list[SpeakingRequest]:
         SpeakingRequest(
             id=record.id,
             event_time=record.event_time,
-            address=record.address,
+            address=Address.model_validate(record.address),
             topic=record.topic,
             duration_in_minutes=record.duration_in_minutes,
             requester_email=record.requester_email,
-            status=record.status,
+            status=SpeakingRequestStatus(record.status),
         )
         for record in records
     ]
@@ -67,9 +67,9 @@ def get_by_id(session: Session, speaking_request_id: str) -> SpeakingRequest:
     return SpeakingRequest(
         id=record.id,
         event_time=record.event_time,
-        address=record.address,
+        address=Address.model_validate(record.address),
         topic=record.topic,
         duration_in_minutes=record.duration_in_minutes,
         requester_email=record.requester_email,
-        status=record.status,
+        status=SpeakingRequestStatus(record.status),
     )

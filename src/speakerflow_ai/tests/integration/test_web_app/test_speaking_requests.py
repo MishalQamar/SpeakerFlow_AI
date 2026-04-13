@@ -5,7 +5,7 @@ from speakerflow_ai.web_app.main import app
 
 
 @pytest.fixture
-def client():
+def client(database_engine):
     return TestClient(app)
 
 
@@ -27,7 +27,7 @@ def test_create_speaking_request(client):
     THEN a speaking request with the same attributes is returned
     """
     response = client.post(
-        "/request-speaking/",
+        "/speaking-requests/",
         json={
             "event_time": "2026-05-10T14:30:00",
             "address": {
