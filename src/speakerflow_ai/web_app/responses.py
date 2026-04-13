@@ -13,3 +13,7 @@ class SpeakingRequestDetails(BaseModel):
     duration_in_minutes: PositiveInt
     requester_email: EmailStr
     status: SpeakingRequestStatus
+
+
+class SpeakingRequestList(BaseModel):
+    results: list[SpeakingRequestDetails]

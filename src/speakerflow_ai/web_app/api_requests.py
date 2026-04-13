@@ -11,3 +11,11 @@ class SubmitSpeakingRequest(BaseModel):
     topic: str
     duration_in_minutes: PositiveInt
     requester_email: EmailStr
+
+
+class AcceptSpeakingRequest(BaseModel):
+    id: str
+
+
+class RejectSpeakingRequest(BaseModel):
+    id: str
