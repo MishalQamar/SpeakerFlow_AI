@@ -7,9 +7,11 @@ from speakerflow_ai.web_app.api_requests import (
     RejectSpeakingRequest,
     SubmitSpeakingRequest,
 )
+from speakerflow_ai.web_app.config import load_config
 from speakerflow_ai.web_app.responses import SpeakingRequestDetails
 
 app = FastAPI()
+app_config = load_config()
 
 
 @app.get("/health-check/")
