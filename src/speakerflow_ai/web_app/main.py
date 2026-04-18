@@ -1,29 +1,27 @@
 import uuid
 from pathlib import Path
 
+from ai import run_speaking_request_review_with_openai
+from ai.models import SpeakingRequestAnalysisInput, SpeakingRequestAnalysisResult
 from alembic import config, script
 from alembic.runtime import migration
+from database import speaking_request_db
 from fastapi import Depends, FastAPI, Response
+from models import SpeakingRequest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from speakerflow_ai.database import speaking_request_db
-from speakerflow_ai.models import SpeakingRequest
-from speakerflow_ai.web_app.api_requests import (
+from .api_requests import (
     AcceptSpeakingRequest,
     RejectSpeakingRequest,
     SubmitSpeakingRequest,
 )
-from speakerflow_ai.web_app.config import load_config
-from speakerflow_ai.web_app.responses import SpeakingRequestDetails, SpeakingRequestList
+from .config import load_config
+from .responses import SpeakingRequestDetails, SpeakingRequestList
 
 app = FastAPI()
 app_config = load_config()
 engine = create_engine(app_config.SQLALCHEMY_DATABASE_URI, echo=False)
-
-# web_app/main.py -> .../src/speakerflow_ai/web_app -> package -> src -> service root (alembic.ini)
-_SERVICE_ROOT = Path(__file__).resolve().parent.parent.parent.parent
-ALEMBIC_INI_PATH = _SERVICE_ROOT / "alembic.ini"
 
 
 def get_db_session():
@@ -37,7 +35,11 @@ def get_db_session():
 
 @app.get("/health-check/")
 def health_check(response: Response):
-    alembic_cfg = config.Config(str(ALEMBIC_INI_PATH))
+    alembic_cfg = config.Config()
+    alembic_cfg.set_main_option(
+        "script_location",
+        str(Path(__file__).resolve().parent.parent / "alembic"),
+    )
     db_script = script.ScriptDirectory.from_config(alembic_cfg)
 
     with engine.begin() as connection:
@@ -108,3 +110,28 @@ def reject_speaking_request(
     speaking_request = speaking_request_db.save(db_session, speaking_request)
 
     return speaking_request.model_dump()
+
+
+@app.post(
+    "/ai/review-speaking-request/",
+    status_code=200,
+    response_model=SpeakingRequestAnalysisResult,
+)
+async def review_speaking_request(
+    submit_speaking_request: SubmitSpeakingRequest,
+):
+    speaking_request = SpeakingRequest(
+        id=str(uuid.uuid4()),
+        event_time=submit_speaking_request.event_time,
+        address=submit_speaking_request.address,
+        topic=submit_speaking_request.topic,
+        duration_in_minutes=submit_speaking_request.duration_in_minutes,
+        requester_email=submit_speaking_request.requester_email,
+        status="PENDING",
+    )
+
+    analysis_input = SpeakingRequestAnalysisInput(
+        speaking_request=speaking_request,
+    )
+
+    return await run_speaking_request_review_with_openai(analysis_input)

@@ -7,6 +7,9 @@ class BaseConfig:
     APP_ENVIRONMENT = "local"
     SQLALCHEMY_DATABASE_URI = None
 
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+
 
 class LocalConfig(BaseConfig):
     DEBUG = True
